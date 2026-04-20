@@ -114,9 +114,15 @@ export default function Quiz() {
               {questions.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => { setStep(i); setPhase('discussion'); setSelected(null) }}
+                  onClick={() => {
+                    if (i < step) { setStep(i); setPhase('discussion'); setSelected(null); setRevealed(false) }
+                  }}
                   className={`rounded-full border-2 border-white transition-all duration-300 ${
-                    i === step ? `w-5 h-5 ${theme.dot}` : 'w-4 h-4 bg-white/40'
+                    i === step
+                      ? `w-5 h-5 ${theme.dot}`
+                      : i < step
+                      ? `w-4 h-4 bg-white cursor-pointer hover:scale-125`
+                      : 'w-4 h-4 bg-white/30 cursor-default'
                   }`}
                 />
               ))}
