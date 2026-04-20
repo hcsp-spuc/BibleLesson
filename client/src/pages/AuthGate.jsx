@@ -8,7 +8,7 @@ export default function AuthGate() {
   const [searchParams] = useSearchParams()
   const next = searchParams.get('next') ?? '/'
 
-  const [tab, setTab] = useState('signin') // 'signin' | 'signup'
+  const [tab, setTab] = useState('signup') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
