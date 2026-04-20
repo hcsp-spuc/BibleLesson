@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { FaArrowLeft, FaBookOpen, FaQuestionCircle } from 'react-icons/fa'
+import { FaArrowLeft, FaBookOpen, FaQuestionCircle, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
 
 export default function Quiz() {
@@ -13,6 +13,7 @@ export default function Quiz() {
   const [phase, setPhase] = useState('discussion')
   const [answers, setAnswers] = useState({})
   const [selected, setSelected] = useState(null)
+  const [revealed, setRevealed] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function Quiz() {
     const newAnswers = { ...answers, [q.id]: selected }
     setAnswers(newAnswers)
     setSelected(null)
+    setRevealed(false)
 
     if (isLast) {
       const score = questions.reduce((acc, question) => {
@@ -144,33 +146,70 @@ export default function Quiz() {
               <div className="flex flex-col flex-1">
                 <p className="text-gray-500 text-base font-bold uppercase tracking-widest mb-6 flex items-center gap-2"><FaQuestionCircle /> Choose your answer</p>
                 <div className="grid gap-5 flex-1">
-                  {q.choices.map((choice) => (
-                    <button
-                      key={choice.id}
-                      onClick={() => setSelected(choice.id)}
-                      className={`text-left px-7 py-6 rounded-2xl border-2 text-2xl font-semibold transition ${
-                        selected === choice.id
-                          ? `${theme.border} ${theme.selectedBg} ${theme.text}`
-                          : 'border-gray-200 text-gray-800 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {choice.text}
-                    </button>
-                  ))}
+                  {q.choices.map((choice) => {
+                    const isSelected = selected === choice.id
+                    const isCorrect = choice.is_correct
+                    let choiceStyle = 'border-gray-200 text-gray-800 hover:border-gray-300 hover:bg-gray-50'
+                    if (revealed) {
+                      if (isCorrect) choiceStyle = 'border-green-500 bg-green-50 text-green-700'
+                      else if (isSelected && !isCorrect) choiceStyle = 'border-red-400 bg-red-50 text-red-600'
+                      else choiceStyle = 'border-gray-200 text-gray-400'
+                    } else if (isSelected) {
+                      choiceStyle = `${theme.border} ${theme.selectedBg} ${theme.text}`
+                    }
+                    return (
+                      <button
+                        key={choice.id}
+                        onClick={() => !revealed && setSelected(choice.id)}
+                        disabled={revealed}
+                        className={`text-left px-7 py-6 rounded-2xl border-2 text-2xl font-semibold transition ${choiceStyle}`}
+                      >
+                        <span className="flex items-center justify-between">
+                          {choice.text}
+                          {revealed && isCorrect && <FaCheckCircle className="text-green-500 shrink-0 ml-3" />}
+                          {revealed && isSelected && !isCorrect && <FaTimesCircle className="text-red-400 shrink-0 ml-3" />}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
+
+                {/* Feedback message */}
+                {revealed && (() => {
+                  const selectedChoice = q.choices.find(c => c.id === selected)
+                  const correct = selectedChoice?.is_correct
+                  return (
+                    <div className={`mt-6 px-6 py-4 rounded-2xl text-xl font-bold flex items-center gap-3 ${
+                      correct ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-600'
+                    }`}>
+                      {correct
+                        ? <><FaCheckCircle className="shrink-0 text-2xl" /> That's correct! Well done.</>  
+                        : <><FaTimesCircle className="shrink-0 text-2xl" /> Not quite. The correct answer is: <span className="underline">{q.choices.find(c => c.is_correct)?.text}</span></>}
+                    </div>
+                  )
+                })()}
 
                 {/* Continue footer */}
                 <div className="bg-[#2a6496] -mx-10 md:-mx-16 -mb-12 px-10 py-10 mt-10 text-center">
                   <p className="text-green-300 text-base font-bold tracking-widest uppercase mb-5">
-                    {selected ? 'Ready to continue?' : 'Select an answer above to continue.'}
+                    {revealed ? 'Ready to continue?' : 'Select an answer above to continue.'}
                   </p>
-                  <button
-                    onClick={handleNext}
-                    disabled={!selected}
-                    className="bg-white text-gray-800 text-2xl font-bold px-20 py-5 rounded-xl hover:bg-gray-100 transition disabled:opacity-40"
-                  >
-                    {isLast ? 'Submit Answers' : 'Continue'}
-                  </button>
+                  {!revealed ? (
+                    <button
+                      onClick={() => setRevealed(true)}
+                      disabled={!selected}
+                      className="bg-white text-gray-800 text-2xl font-bold px-20 py-5 rounded-xl hover:bg-gray-100 transition disabled:opacity-40"
+                    >
+                      Check Answer
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNext}
+                      className="bg-white text-gray-800 text-2xl font-bold px-20 py-5 rounded-xl hover:bg-gray-100 transition"
+                    >
+                      {isLast ? 'Submit Answers' : 'Continue'}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
