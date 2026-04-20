@@ -37,7 +37,31 @@ export default function Quiz() {
     load()
   }, [lessonId])
 
-  if (loading) return <p className="text-center mt-20 text-gray-500">Loading...</p>
+  if (loading) return (
+    <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
+      <div className="bg-gray-500 px-8 py-5 flex items-center gap-4 shrink-0">
+        <FaBookOpen className="text-white text-2xl" />
+        <h1 className="text-white text-4xl font-bold tracking-tight">Discover Bible Guides</h1>
+      </div>
+      <div className="flex flex-1 items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200" />
+            <div className="absolute inset-0 rounded-full border-4 border-t-blue-500 animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FaBookOpen className="text-blue-500 text-2xl" />
+            </div>
+          </div>
+          <p className="text-gray-500 text-xl font-semibold tracking-wide">Loading your lesson…</p>
+          <div className="flex gap-2">
+            {[0,1,2].map(i => (
+              <div key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
   if (!questions.length) return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <p className="text-gray-400 mb-4">No questions available for this lesson.</p>
