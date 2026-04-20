@@ -89,15 +89,15 @@ export default function Result() {
             </div>
 
             {/* Prayer section */}
-            <p className="text-green-600 text-sm font-extrabold uppercase tracking-widest text-center mb-6">My Prayer</p>
-            <p className="text-gray-700 text-lg leading-loose mb-6">
+            <p className="text-green-600 text-base font-extrabold uppercase tracking-widest text-center mb-6">My Prayer</p>
+            <p className="text-gray-700 text-2xl leading-loose mb-6">
               If you've never prayed before, that's okay. Here is a short prayer to get you started, if you want to read these words aloud to God or say them silently in your head to Him. You can also take this prayer and make it your own by paraphrasing or add your own words to it.
             </p>
-            <p className="text-gray-700 text-lg leading-loose indent-8 mb-8">
+            <p className="text-gray-700 text-2xl leading-loose indent-8 mb-8">
               Try to think of talking to God like you would talk to a friend, saying whatever is on your heart.
             </p>
             <div className="bg-green-50 rounded-2xl px-8 py-7 mb-10">
-              <p className="text-gray-800 text-xl leading-loose text-justify font-medium">
+              <p className="text-gray-800 text-2xl leading-loose text-justify font-medium">
                 Father, thank You for creating this world for me to enjoy; thank You for creating me and loving me so much, that You are willing to guide my life. I ask You to meet my personal needs and to lead me as I read the Bible. I ask this in the name of Jesus, Amen.
               </p>
             </div>
@@ -105,8 +105,8 @@ export default function Result() {
             <hr className="border-gray-200 mb-10" />
 
             {/* Decision section */}
-            <p className="text-green-600 text-sm font-extrabold uppercase tracking-widest text-center mb-4">My Decision</p>
-            <p className="text-gray-700 text-lg leading-loose mb-8">
+            <p className="text-green-600 text-base font-extrabold uppercase tracking-widest text-center mb-4">My Decision</p>
+            <p className="text-gray-700 text-2xl leading-loose mb-8">
               Take a moment to reflect on the following statements, placing a check mark next to each statement you relate to.
             </p>
             <div className="grid gap-5 mb-10">
@@ -120,16 +120,16 @@ export default function Result() {
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <div className={`mt-1 w-6 h-6 shrink-0 rounded border-2 flex items-center justify-center transition ${
+                  <div className={`mt-1 w-7 h-7 shrink-0 rounded border-2 flex items-center justify-center transition ${
                     checked.includes(i) ? 'border-green-500 bg-white' : 'border-gray-300'
                   }`}>
                     {checked.includes(i) && (
-                      <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <p className={`text-xl font-medium leading-snug ${checked.includes(i) ? 'text-green-700' : 'text-gray-700'}`}>
+                  <p className={`text-2xl font-medium leading-snug ${checked.includes(i) ? 'text-green-700' : 'text-gray-700'}`}>
                     {text}
                   </p>
                 </button>
