@@ -111,7 +111,7 @@ export default function Home() {
         </div>
       </div>
       {/* Footer */}
-      <footer className="bg-[#0f1f5c] text-white px-6 py-12">
+      <footer className="bg-[#091557] text-white px-6 py-12">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div>
