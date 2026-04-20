@@ -10,6 +10,7 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([])
   const [lesson, setLesson] = useState(null)
   const [step, setStep] = useState(0)
+  const [maxStep, setMaxStep] = useState(0)
   const [phase, setPhase] = useState('discussion')
   const [answers, setAnswers] = useState({})
   const [selected, setSelected] = useState(null)
@@ -95,7 +96,9 @@ export default function Quiz() {
         state: { score, total, lessonId: parseInt(lessonId), categoryId: lesson.category_id, isFirst: location.state?.isFirst ?? false }
       })
     } else {
-      setStep(step + 1)
+      const nextStep = step + 1
+      setStep(nextStep)
+      setMaxStep(prev => Math.max(prev, nextStep))
       setPhase('discussion')
     }
   }
@@ -139,12 +142,20 @@ export default function Quiz() {
                 <button
                   key={i}
                   onClick={() => {
-                    if (i < step) { setStep(i); setPhase('discussion'); setSelected(null); setRevealed(false) }
+                    if (i <= maxStep) {
+                      const prevAnswer = answers[questions[i].id]
+                      setStep(i)
+                      setPhase('discussion')
+                      setSelected(prevAnswer ?? null)
+                      setRevealed(!!prevAnswer)
+                    }
                   }}
                   className={`rounded-full border-2 border-white transition-all duration-300 ${
                     i === step
                       ? `w-5 h-5 ${theme.dot}`
-                      : i < step
+                      : i < maxStep
+                      ? `w-4 h-4 bg-white cursor-pointer hover:scale-125`
+                      : i === maxStep
                       ? `w-4 h-4 bg-white cursor-pointer hover:scale-125`
                       : 'w-4 h-4 bg-white/30 cursor-default'
                   }`}
@@ -169,7 +180,7 @@ export default function Quiz() {
                   onClick={() => setPhase('question')}
                   className={`${theme.btn} text-white text-2xl font-bold px-10 py-6 rounded-2xl w-full transition mt-10`}
                 >
-                  Answer the Question →
+                  {answers[q.id] ? 'Review Your Answer →' : 'Answer the Question →'}
                 </button>
               </div>
             ) : (
