@@ -8,13 +8,31 @@ export default function AuthGate() {
   const [searchParams] = useSearchParams()
   const next = searchParams.get('next') ?? '/'
 
-  const [tab, setTab] = useState('signup') // 'signin' | 'signup'
+  const [mode, setMode] = useState('signup')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  async function handleSignUp(e) {
+    e.preventDefault()
+    setError('')
+    if (password !== confirm) return setError('Passwords do not match.')
+    setLoading(true)
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: `${firstName} ${lastName}`.trim() } },
+    })
+    setLoading(false)
+    if (error) return setError(error.message)
+    setMessage('Account created! Check your email to confirm, then sign in.')
+    setMode('signin')
+  }
 
   async function handleSignIn(e) {
     e.preventDefault()
@@ -26,120 +44,172 @@ export default function AuthGate() {
     navigate(next)
   }
 
-  async function handleSignUp(e) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: name } },
-    })
-    setLoading(false)
-    if (error) return setError(error.message)
-    setMessage('Account created! Check your email to confirm, then sign in.')
-    setTab('signin')
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="bg-blue-100 text-blue-600 rounded-full w-14 h-14 flex items-center justify-center text-2xl mb-3">
-            <FaBookOpen />
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+
+      {/* Hero header — same as Home */}
+      <div
+        className="relative flex flex-col items-center justify-center text-center py-20 px-6 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/header-background.png')" }}
+      >
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="flex items-center gap-3 mb-4">
+            <FaBookOpen className="text-yellow-400 text-4xl" />
+            <span className="text-white text-4xl font-extrabold tracking-tight">BibleLearn</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Unlock the Next Lesson</h1>
-          <p className="text-gray-400 text-sm mt-1 text-center">
-            Create a free account or sign in to continue your Bible study journey.
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">
+            Grow in Faith. Learn the Word.
+          </h1>
+          <p className="text-blue-200 text-lg">
+            Bible study for every stage of life.
           </p>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
-          <button
-            onClick={() => { setTab('signin'); setError(''); setMessage('') }}
-            className={`flex-1 py-2 rounded-md text-sm font-semibold transition ${tab === 'signin' ? 'bg-white shadow text-gray-800' : 'text-gray-500'}`}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => { setTab('signup'); setError(''); setMessage('') }}
-            className={`flex-1 py-2 rounded-md text-sm font-semibold transition ${tab === 'signup' ? 'bg-white shadow text-gray-800' : 'text-gray-500'}`}
-          >
-            Sign Up
+      {/* Form area */}
+      <div className="flex-1 flex flex-col items-center px-6 py-16 bg-gray-100">
+        <div className="w-full max-w-lg">
+
+          {mode === 'signup' ? (
+            <>
+              <h2 className="text-3xl font-extrabold text-gray-600 uppercase tracking-widest mb-4">
+                You've just begun...
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-10">
+                To save your progress and continue this exciting Bible study series, enter your name and email address below to create an account.
+              </p>
+
+              {message && <p className="text-green-600 bg-green-50 rounded-lg px-4 py-3 mb-6 text-base">{message}</p>}
+              {error && <p className="text-red-500 bg-red-50 rounded-lg px-4 py-3 mb-6 text-base">{error}</p>}
+
+              <form onSubmit={handleSignUp} className="grid gap-6">
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* First name</label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Last name</label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={e => setLastName(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                  <p className="text-gray-400 text-sm mt-1">6 characters minimum</p>
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Password confirmation</label>
+                  <input
+                    type="password"
+                    value={confirm}
+                    onChange={e => setConfirm(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-extrabold uppercase tracking-widest px-10 py-4 rounded transition disabled:opacity-50"
+                  >
+                    {loading ? 'Creating account…' : 'Sign Up'}
+                  </button>
+                </div>
+              </form>
+
+              <p className="mt-8 text-gray-500 text-base">
+                Already have an account?{' '}
+                <button onClick={() => { setMode('signin'); setError('') }} className="text-orange-500 hover:underline font-semibold">
+                  Sign In
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl font-extrabold text-gray-600 uppercase tracking-widest mb-4">
+                Welcome Back
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-10">
+                Sign in to continue your Bible study journey.
+              </p>
+
+              {message && <p className="text-green-600 bg-green-50 rounded-lg px-4 py-3 mb-6 text-base">{message}</p>}
+              {error && <p className="text-red-500 bg-red-50 rounded-lg px-4 py-3 mb-6 text-base">{error}</p>}
+
+              <form onSubmit={handleSignIn} className="grid gap-6">
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-extrabold uppercase tracking-widest px-10 py-4 rounded transition disabled:opacity-50"
+                  >
+                    {loading ? 'Signing in…' : 'Sign In'}
+                  </button>
+                </div>
+              </form>
+
+              <p className="mt-8 text-gray-500 text-base">
+                Don't have an account?{' '}
+                <button onClick={() => { setMode('signup'); setError('') }} className="text-orange-500 hover:underline font-semibold">
+                  Sign Up
+                </button>
+              </p>
+            </>
+          )}
+
+          <button onClick={() => navigate('/')} className="mt-6 text-gray-400 text-sm hover:underline">
+            ← Back to Home
           </button>
         </div>
-
-        {message && <p className="text-green-600 text-sm bg-green-50 rounded-lg px-4 py-3 mb-4">{message}</p>}
-        {error && <p className="text-red-500 text-sm bg-red-50 rounded-lg px-4 py-3 mb-4">{error}</p>}
-
-        {tab === 'signin' ? (
-          <form onSubmit={handleSignIn} className="grid gap-4">
-            <input
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              className="border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? 'Signing in…' : 'Sign In & Continue'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleSignUp} className="grid gap-4">
-            <input
-              type="text"
-              placeholder="Full name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-              className="border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
-            />
-            <input
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
-            />
-            <input
-              type="password"
-              placeholder="Password (min 6 characters)"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? 'Creating account…' : 'Create Account & Continue'}
-            </button>
-          </form>
-        )}
-
-        <button onClick={() => navigate('/')} className="mt-5 text-gray-400 text-xs hover:underline w-full text-center">
-          ← Back to Home
-        </button>
       </div>
     </div>
   )
