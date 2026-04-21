@@ -62,10 +62,13 @@ INSERT INTO categories (name) VALUES
 INSERT INTO lessons (category_id, title, description) VALUES
     (1, 'God Made Everything', 'Learn how God created the world and everything in it.'),
     (1, 'Jesus Loves Me',      'Discover how much Jesus loves each one of us.'),
+    (1, 'The Holy Spirit',     'Learn about the Holy Spirit and how He helps us every day.'),
     (2, 'Who Is God?',         'Explore the nature and character of God.'),
     (2, 'The Life of Jesus',   'A deeper look at the life and ministry of Jesus Christ.'),
+    (2, 'The Holy Spirit and You', 'Discover the role of the Holy Spirit in the life of a believer.'),
     (3, 'Creation and Purpose','Understanding God''s design and our purpose in His plan.'),
-    (3, 'Faith and Works',     'Examining the relationship between faith and action in the Christian life.');
+    (3, 'Faith and Works',     'Examining the relationship between faith and action in the Christian life.'),
+    (3, 'The Holy Spirit and Sanctification', 'A deep dive into how the Holy Spirit transforms and sanctifies believers.');
 
 -- ============================================================
 -- Seed: Questions & Choices
