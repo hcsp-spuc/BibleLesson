@@ -46,10 +46,10 @@ export default function Home() {
         style={{ backgroundImage: "url('/images/header-background.png')" }}
       >
         <div className="relative z-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3">
             Grow in Faith. Learn the Word.
           </h1>
-          <p className="text-blue-200 text-lg mb-8">
+          <p className="text-blue-200 text-xl mb-8">
             Bible study for every stage of life. Choose your category and start
             your journey today.
           </p>
@@ -63,14 +63,14 @@ export default function Home() {
       </div>
 
       {/* Categories */}
-      <div id="categories" className="max-w-5xl mx-auto px-6 py-16">
-        <p className="text-center text-blue-600 font-semibold uppercase tracking-widest text-sm mb-2">
+      <div id="categories" className="max-w-7xl mx-auto px-6 py-16">
+        <p className="text-center text-blue-600 font-semibold uppercase tracking-widest text-base mb-2">
           Choose Your Study Level
         </p>
-        <h2 className="text-center text-3xl font-bold text-gray-800 mb-2">
+        <h2 className="text-center text-4xl font-bold text-gray-800 mb-2">
           Find Lessons Made for You
         </h2>
-        <p className="text-center text-gray-500 mb-12">
+        <p className="text-center text-gray-500 text-lg mb-12">
           Bible study that fits your age, your journey, and your growth.
         </p>
 
@@ -83,25 +83,25 @@ export default function Home() {
               <img
                 src={cat.image}
                 alt={cat.name}
-                className="w-full h-48 object-cover"
+                className="w-full h-64 object-cover"
               />
               <div className="flex justify-center">
                 <div
-                  className={`${cat.iconBg} text-2xl rounded-full w-12 h-12 flex items-center justify-center -mt-6 z-10 relative`}
+                  className={`${cat.iconBg} text-3xl rounded-full w-16 h-16 flex items-center justify-center -mt-8 z-10 relative`}
                 >
                   {cat.icon}
                 </div>
               </div>
-              <div className="flex flex-col items-center text-center p-6 pt-3 flex-1">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+              <div className="flex flex-col items-center text-center p-8 pt-4 flex-1">
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">
                   {cat.name}
                 </h3>
-                <p className="text-gray-500 text-sm mb-6 flex-1">
+                <p className="text-gray-500 text-base mb-6 flex-1">
                   {cat.description}
                 </p>
                 <button
                   onClick={() => navigate(`/lessons/${cat.id}`)}
-                  className={`${cat.btnColor} text-white font-semibold px-6 py-2 rounded-lg w-full transition`}
+                  className={`${cat.btnColor} text-white font-semibold text-lg px-6 py-3 rounded-lg w-full transition`}
                 >
                   Start Learning
                 </button>
@@ -112,7 +112,7 @@ export default function Home() {
       </div>
       {/* Footer */}
       <footer className="bg-[#091557] text-white px-6 py-12">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-3">

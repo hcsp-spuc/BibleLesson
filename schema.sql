@@ -28,7 +28,8 @@ CREATE TABLE choices (
     id          SERIAL PRIMARY KEY,
     question_id INT     NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
     text        TEXT    NOT NULL,
-    is_correct  BOOLEAN NOT NULL DEFAULT FALSE
+    is_correct  BOOLEAN NOT NULL DEFAULT FALSE,
+    explanation TEXT
 );
 
 -- ============================================================
@@ -234,4 +235,5 @@ INSERT INTO choices (question_id, text, is_correct) VALUES
 -- Migration (run on existing DB):
 -- ALTER TABLE questions ADD COLUMN IF NOT EXISTS discussion TEXT;
 -- ALTER TABLE lessons   ADD COLUMN IF NOT EXISTS content TEXT;
+-- ALTER TABLE choices   ADD COLUMN IF NOT EXISTS explanation TEXT;
 -- ============================================================

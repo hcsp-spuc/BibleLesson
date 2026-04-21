@@ -27,7 +27,7 @@ export default function Quiz() {
 
       const { data: qData } = await supabase
         .from('questions')
-        .select('id, text, discussion, choices(id, text, is_correct)')
+        .select('id, text, discussion, choices(id, text, is_correct, explanation)')
         .eq('lesson_id', lessonId)
         .order('id')
 
@@ -137,7 +137,7 @@ export default function Quiz() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/50" />
 
             {/* Dot navigation */}
-            <div className="relative z-10 flex gap-4 mb-8">
+            <div className="absolute bottom-8 z-10 flex gap-4">
               {questions.map((_, i) => (
                 <button
                   key={i}
@@ -163,10 +163,12 @@ export default function Quiz() {
               ))}
             </div>
 
-            {/* Question title */}
-            <h2 className="relative z-10 text-white text-5xl md:text-6xl font-extrabold drop-shadow-xl pb-14 px-8 leading-tight max-w-3xl">
-              {step + 1}. {q.text}
-            </h2>
+            {/* Question title — only shown during question phase */}
+            {phase === 'question' && (
+              <h2 className="relative z-10 text-white text-5xl md:text-6xl font-extrabold drop-shadow-xl pb-14 px-8 leading-tight max-w-3xl">
+                {step + 1}. {q.text}
+              </h2>
+            )}
           </div>
 
           {/* White content card — fills remaining height */}
@@ -225,7 +227,19 @@ export default function Quiz() {
                     }`}>
                       {correct
                         ? <><FaCheckCircle className="shrink-0 text-2xl" /> That's correct! Well done.</>  
-                        : <><FaTimesCircle className="shrink-0 text-2xl" /> Not quite. The correct answer is: <span className="underline">{q.choices.find(c => c.is_correct)?.text}</span></>}
+                        : (
+                          <div className="flex flex-col gap-2">
+                            <span className="flex items-center gap-3">
+                              <FaTimesCircle className="shrink-0 text-2xl" />
+                              Not quite. The correct answer is: <span className="underline">{q.choices.find(c => c.is_correct)?.text}</span>
+                            </span>
+                            {q.choices.find(c => c.is_correct)?.explanation && (
+                              <p className="text-base font-normal text-red-500 mt-1 pl-9">
+                                {q.choices.find(c => c.is_correct).explanation}
+                              </p>
+                            )}
+                          </div>
+                        )}
                     </div>
                   )
                 })()}
