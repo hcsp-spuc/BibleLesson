@@ -4,9 +4,9 @@ import { FaBookOpen, FaSchool, FaUserGraduate, FaLock, FaCheckCircle, FaChevronR
 import { supabase } from '../lib/supabase'
 
 const categoryMeta = {
-  1: { label: 'Elementary',      icon: <FaBookOpen />,     color: 'text-blue-600',   border: 'border-blue-300',   bg: 'bg-blue-50',   accent: 'bg-blue-600'   },
-  2: { label: 'High School',     icon: <FaSchool />,       color: 'text-green-700',  border: 'border-green-300',  bg: 'bg-green-50',  accent: 'bg-green-700'  },
-  3: { label: 'Adult / College', icon: <FaUserGraduate />, color: 'text-purple-700', border: 'border-purple-300', bg: 'bg-purple-50', accent: 'bg-purple-700' },
+  1: { label: 'Elementary',      icon: <FaBookOpen />,     color: 'text-blue-600',   border: 'border-blue-300',   bg: 'bg-blue-50',   accent: 'bg-blue-600',   image: '/images/elementary.png'   },
+  2: { label: 'High School',     icon: <FaSchool />,       color: 'text-green-700',  border: 'border-green-300',  bg: 'bg-green-50',  accent: 'bg-green-700',  image: '/images/highschool.png'   },
+  3: { label: 'Adult / College', icon: <FaUserGraduate />, color: 'text-purple-700', border: 'border-purple-300', bg: 'bg-purple-50', accent: 'bg-purple-700', image: '/images/college.png'      },
 }
 
 export default function Dashboard() {
@@ -26,7 +26,7 @@ export default function Dashboard() {
   useEffect(() => {
     supabase
       .from('lessons')
-      .select('id, title, description')
+      .select('id, title, description, image_url')
       .eq('category_id', categoryId)
       .order('id')
       .then(({ data }) => {
@@ -84,7 +84,7 @@ export default function Dashboard() {
       </div>
 
       {/* Lessons */}
-      <div className="max-w-4xl mx-auto px-6 pb-16">
+      <div className="max-w-7xl mx-auto px-6 pb-16">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-extrabold text-gray-800">All Lessons</h2>
           <button
@@ -107,17 +107,23 @@ export default function Dashboard() {
                 <span className="text-white text-base font-extrabold uppercase tracking-widest">Lesson 1</span>
                 <FaCheckCircle className="text-white text-xl" />
               </div>
-              <div className="flex flex-col items-center text-center px-6 py-8 flex-1">
-                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-5">
-                  <FaCheckCircle className="text-green-500 text-3xl" />
+              <div
+                className="relative flex flex-col items-center text-center px-6 py-8 flex-1 bg-cover bg-center"
+                style={{ backgroundImage: `url(${lesson1.image_url || meta.image})` }}
+              >
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="relative z-10 flex flex-col items-center w-full flex-1">
+                  <div className="w-16 h-16 rounded-full bg-green-500/80 flex items-center justify-center mb-5">
+                    <FaCheckCircle className="text-white text-3xl" />
+                  </div>
+                  <p className="text-sm font-bold uppercase tracking-widest text-green-300 mb-2">Completed</p>
+                  <p className="text-2xl font-extrabold text-white mb-3">{lesson1.title}</p>
+                  {lesson1.description && (
+                    <p className="text-gray-200 text-base leading-relaxed flex-1">{lesson1.description}</p>
+                  )}
                 </div>
-                <p className="text-sm font-bold uppercase tracking-widest text-green-600 mb-2">Completed</p>
-                <p className="text-2xl font-extrabold text-gray-800 mb-3">{lesson1.title}</p>
-                {lesson1.description && (
-                  <p className="text-gray-400 text-base leading-relaxed flex-1">{lesson1.description}</p>
-                )}
               </div>
-              <div className="px-6 pb-6">
+              <div className="px-6 pb-6 mt-4">
                 <div className="flex items-center justify-center gap-2 bg-green-50 border border-green-300 text-green-700 rounded-xl py-4 font-bold text-base group-hover:bg-green-100 transition">
                   <span>Review Lesson</span>
                   <FaChevronRight />
@@ -160,34 +166,40 @@ export default function Dashboard() {
                 </div>
 
                 {/* Card body */}
-                <div className="flex flex-col items-center text-center px-6 py-8 flex-1">
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-5 ${
-                    locked ? 'bg-gray-100' : done ? 'bg-green-100' : meta.bg
-                  }`}>
-                    {locked
-                      ? <FaLock className="text-gray-400 text-2xl" />
-                      : done
-                      ? <FaCheckCircle className="text-green-500 text-3xl" />
-                      : <span className={`text-2xl ${meta.color}`}>{meta.icon}</span>
-                    }
+                <div
+                  className="relative flex flex-col items-center text-center px-6 py-8 flex-1 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${lesson.image_url || meta.image})` }}
+                >
+                  <div className="absolute inset-0 bg-black/50" />
+                  <div className="relative z-10 flex flex-col items-center w-full flex-1">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-5 ${
+                      locked ? 'bg-gray-500/80' : done ? 'bg-green-500/80' : 'bg-white/20'
+                    }`}>
+                      {locked
+                        ? <FaLock className="text-white text-2xl" />
+                        : done
+                        ? <FaCheckCircle className="text-white text-3xl" />
+                        : <span className="text-white text-2xl">{meta.icon}</span>
+                      }
+                    </div>
+                    <p className={`text-sm font-bold uppercase tracking-widest mb-2 ${
+                      locked ? 'text-gray-300' : done ? 'text-green-300' : 'text-white'
+                    }`}>
+                      {done ? 'Completed' : locked ? 'Locked' : 'Available'}
+                    </p>
+                    <p className="text-2xl font-extrabold mb-3 text-white">
+                      {lesson.title}
+                    </p>
+                    <p className="text-base leading-relaxed flex-1 text-gray-200">
+                      {locked
+                        ? 'Complete the previous lesson to unlock this one.'
+                        : lesson.description || (done ? 'Tap to review your answers.' : 'Ready to begin? Start this lesson now.')}
+                    </p>
                   </div>
-                  <p className={`text-sm font-bold uppercase tracking-widest mb-2 ${
-                    locked ? 'text-gray-400' : done ? 'text-green-600' : meta.color
-                  }`}>
-                    {done ? 'Completed' : locked ? 'Locked' : 'Available'}
-                  </p>
-                  <p className={`text-2xl font-extrabold mb-3 ${locked ? 'text-gray-400' : 'text-gray-800'}`}>
-                    {lesson.title}
-                  </p>
-                  <p className={`text-base leading-relaxed flex-1 ${locked ? 'text-gray-300' : 'text-gray-400'}`}>
-                    {locked
-                      ? 'Complete the previous lesson to unlock this one.'
-                      : lesson.description || (done ? 'Tap to review your answers.' : 'Ready to begin? Start this lesson now.')}
-                  </p>
                 </div>
 
                 {/* CTA button */}
-                <div className="px-6 pb-6">
+                <div className="px-6 pb-6 mt-4">
                   {locked ? (
                     <div className="flex items-center justify-center gap-2 bg-gray-100 border border-gray-200 text-gray-400 rounded-xl py-4 font-bold text-base">
                       <FaLock className="text-sm" />
