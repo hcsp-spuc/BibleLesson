@@ -16,7 +16,7 @@ const decisions = [
 export default function Result() {
   const { state } = useLocation()
   const navigate = useNavigate()
-  const { score = 0, total = 0, categoryId = 1, isFirst = false } = state ?? {}
+  const { score = 0, total = 0, categoryId = 1, lessonNumber = 1, isFirst = false } = state ?? {}
   const percentage = total > 0 ? Math.round((score / total) * 100) : 0
 
   const [checked, setChecked] = useState([])
@@ -31,9 +31,10 @@ export default function Result() {
 
   function handleComplete() {
     if (isFirst) {
-      navigate(`/auth-gate?next=${encodeURIComponent(nextPath)}`)
+      navigate(`/auth-gate?category=${categoryId}`)
     } else {
-      navigate(nextPath)
+      localStorage.setItem(`cat${categoryId}_lesson${lessonNumber}_done`, 'true')
+      navigate(`/dashboard?category=${categoryId}`)
     }
   }
 

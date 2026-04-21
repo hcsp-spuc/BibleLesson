@@ -7,12 +7,16 @@ export default function Quiz() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const reviewMode = location.state?.reviewMode ?? false
   const [questions, setQuestions] = useState([])
   const [lesson, setLesson] = useState(null)
   const [step, setStep] = useState(0)
   const [maxStep, setMaxStep] = useState(0)
   const [phase, setPhase] = useState('discussion')
-  const [answers, setAnswers] = useState({})
+  const [answers, setAnswers] = useState(() => {
+    const saved = localStorage.getItem(`lesson_${lessonId}_answers`)
+    return saved ? JSON.parse(saved) : {}
+  })
   const [selected, setSelected] = useState(null)
   const [revealed, setRevealed] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -25,14 +29,30 @@ export default function Quiz() {
         .eq('id', lessonId)
         .single()
 
+      const { count } = await supabase
+        .from('lessons')
+        .select('id', { count: 'exact', head: true })
+        .eq('category_id', lessonData.category_id)
+        .lt('id', lessonId)
+
       const { data: qData } = await supabase
         .from('questions')
         .select('id, text, discussion, choices(id, text, is_correct, explanation)')
         .eq('lesson_id', lessonId)
         .order('id')
 
-      setLesson(lessonData)
+      setLesson({ ...lessonData, lessonNumber: (count ?? 0) + 1 })
       setQuestions(qData ?? [])
+      if (reviewMode && qData?.length) {
+        setMaxStep(qData.length - 1)
+        const saved = localStorage.getItem(`lesson_${lessonId}_answers`)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          setAnswers(parsed)
+          setSelected(parsed[qData[0].id] ?? null)
+          setRevealed(!!parsed[qData[0].id])
+        }
+      }
       setLoading(false)
     }
     load()
@@ -92,8 +112,10 @@ export default function Quiz() {
         const choice = question.choices.find(c => c.id === newAnswers[question.id])
         return acc + (choice?.is_correct ? 1 : 0)
       }, 0)
+      localStorage.setItem(`lesson_${lessonId}_answers`, JSON.stringify(newAnswers))
+      localStorage.setItem(`lesson_${lessonId}_score`, JSON.stringify({ score, total }))
       navigate('/result', {
-        state: { score, total, lessonId: parseInt(lessonId), categoryId: lesson.category_id, isFirst: location.state?.isFirst ?? false }
+        state: { score, total, lessonId: parseInt(lessonId), categoryId: lesson.category_id, lessonNumber: lesson.lessonNumber, isFirst: location.state?.isFirst ?? false }
       })
     } else {
       const nextStep = step + 1
@@ -145,7 +167,7 @@ export default function Quiz() {
                     if (i <= maxStep) {
                       const prevAnswer = answers[questions[i].id]
                       setStep(i)
-                      setPhase('discussion')
+                      setPhase(reviewMode && prevAnswer ? 'question' : 'discussion')
                       setSelected(prevAnswer ?? null)
                       setRevealed(!!prevAnswer)
                     }

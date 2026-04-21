@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 export default function AuthGate() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const next = searchParams.get('next') ?? '/'
+  const category = searchParams.get('category') ?? '1'
 
   const [mode, setMode] = useState('signup')
   const [firstName, setFirstName] = useState('')
@@ -23,13 +23,15 @@ export default function AuthGate() {
     setError('')
     if (password !== confirm) return setError('Passwords do not match.')
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: `${firstName} ${lastName}`.trim() } },
     })
     setLoading(false)
     if (error) return setError(error.message)
+    // If email confirmation is disabled, session is available immediately
+    if (data.session) return navigate(`/dashboard?category=${category}`)
     setMessage('Account created! Check your email to confirm, then sign in.')
     setMode('signin')
   }
@@ -41,7 +43,7 @@ export default function AuthGate() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (error) return setError(error.message)
-    navigate(next)
+    navigate(`/dashboard?category=${category}`)
   }
 
   return (

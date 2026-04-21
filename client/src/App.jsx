@@ -6,6 +6,7 @@ import AdultCollege from './pages/AdultCollege'
 import Quiz from './pages/Quiz'
 import Result from './pages/Result'
 import AuthGate from './pages/AuthGate'
+import Dashboard from './pages/Dashboard'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/quiz/:lessonId" element={<Quiz />}        />
         <Route path="/result"        element={<Result />}       />
         <Route path="/auth-gate"     element={<AuthGate />}     />
+        <Route path="/dashboard"     element={<Dashboard />}    />
       </Routes>
     </BrowserRouter>
   )
