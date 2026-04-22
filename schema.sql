@@ -32,6 +32,15 @@ CREATE TABLE choices (
     explanation TEXT
 );
 
+CREATE TABLE user_progress (
+    id            SERIAL PRIMARY KEY,
+    user_id       UUID   NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    category_id   INT    NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    lesson_number INT    NOT NULL,
+    completed_at  TIMESTAMP DEFAULT NOW(),
+    UNIQUE (user_id, category_id, lesson_number)
+);
+
 -- ============================================================
 -- Row Level Security
 -- ============================================================
@@ -40,11 +49,16 @@ ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lessons    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE questions  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE choices    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "public read categories" ON categories FOR SELECT USING (true);
 CREATE POLICY "public read lessons"    ON lessons    FOR SELECT USING (true);
 CREATE POLICY "public read questions"  ON questions  FOR SELECT USING (true);
 CREATE POLICY "public read choices"    ON choices    FOR SELECT USING (true);
+
+CREATE POLICY "users manage own progress" ON user_progress
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
 -- ============================================================
 -- Seed: Categories
@@ -239,4 +253,15 @@ INSERT INTO choices (question_id, text, is_correct) VALUES
 -- ALTER TABLE questions ADD COLUMN IF NOT EXISTS discussion TEXT;
 -- ALTER TABLE lessons   ADD COLUMN IF NOT EXISTS content TEXT;
 -- ALTER TABLE choices   ADD COLUMN IF NOT EXISTS explanation TEXT;
+-- CREATE TABLE IF NOT EXISTS user_progress (
+--     id            SERIAL PRIMARY KEY,
+--     user_id       UUID   NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--     category_id   INT    NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+--     lesson_number INT    NOT NULL,
+--     completed_at  TIMESTAMP DEFAULT NOW(),
+--     UNIQUE (user_id, category_id, lesson_number)
+-- );
+-- ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "users manage own progress" ON user_progress
+--   USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 -- ============================================================

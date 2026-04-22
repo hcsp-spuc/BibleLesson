@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { FaBookOpen, FaSchool, FaUserGraduate, FaLock, FaCheckCircle, FaChevronRight } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
+import { syncProgressFromServer } from '../lib/progress'
 
 const categoryMeta = {
   1: { label: 'Elementary',      icon: <FaBookOpen />,     color: 'text-blue-600',   border: 'border-blue-300',   bg: 'bg-blue-50',   accent: 'bg-blue-600',   image: '/images/elementary.png'   },
@@ -24,15 +25,13 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    supabase
-      .from('lessons')
-      .select('id, title, description, image_url')
-      .eq('category_id', categoryId)
-      .order('id')
-      .then(({ data }) => {
-        setLessons(data ?? [])
-        setLoading(false)
-      })
+    Promise.allSettled([
+      syncProgressFromServer(categoryId),
+      supabase.from('lessons').select('id, title, description').eq('category_id', categoryId).order('id')
+    ]).then(([, lessonsResult]) => {
+      setLessons(lessonsResult.value?.data ?? [])
+      setLoading(false)
+    })
   }, [categoryId])
 
   if (loading) return <p className="text-center mt-20 text-gray-500 text-xl">Loading...</p>
@@ -109,7 +108,7 @@ export default function Dashboard() {
               </div>
               <div
                 className="relative flex flex-col items-center text-center px-6 py-8 flex-1 bg-cover bg-center"
-                style={{ backgroundImage: `url(${lesson1.image_url || meta.image})` }}
+                style={{ backgroundImage: `url(${meta.image})` }}
               >
                 <div className="absolute inset-0 bg-black/50" />
                 <div className="relative z-10 flex flex-col items-center w-full flex-1">
@@ -168,7 +167,7 @@ export default function Dashboard() {
                 {/* Card body */}
                 <div
                   className="relative flex flex-col items-center text-center px-6 py-8 flex-1 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${lesson.image_url || meta.image})` }}
+                  style={{ backgroundImage: `url(${meta.image})` }}
                 >
                   <div className="absolute inset-0 bg-black/50" />
                   <div className="relative z-10 flex flex-col items-center w-full flex-1">

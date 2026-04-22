@@ -130,7 +130,7 @@ export default function Quiz() {
 
       {/* Top bar */}
       <div className="bg-gray-500 px-8 py-5 flex items-center gap-4 shrink-0">
-        <button onClick={() => navigate('/')} className="text-white/80 hover:text-white text-xl transition"><FaArrowLeft /></button>
+        <button onClick={() => navigate(reviewMode && lesson ? `/dashboard?category=${lesson.category_id}` : '/')} className="text-white/80 hover:text-white text-xl transition"><FaArrowLeft /></button>
         <h1 className="text-white text-4xl font-bold tracking-tight">Discover Bible Guides</h1>
       </div>
 

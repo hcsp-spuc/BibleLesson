@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { FaBookOpen } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
+import { syncProgressFromServer } from '../lib/progress'
 
 export default function AuthGate() {
   const navigate = useNavigate()
@@ -31,7 +32,10 @@ export default function AuthGate() {
     setLoading(false)
     if (error) return setError(error.message)
     // If email confirmation is disabled, session is available immediately
-    if (data.session) return navigate(`/dashboard?category=${category}`)
+    if (data.session) {
+      await syncProgressFromServer(parseInt(category))
+      return navigate(`/dashboard?category=${category}`)
+    }
     setMessage('Account created! Check your email to confirm, then sign in.')
     setMode('signin')
   }
@@ -43,6 +47,7 @@ export default function AuthGate() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (error) return setError(error.message)
+    await syncProgressFromServer(parseInt(category))
     navigate(`/dashboard?category=${category}`)
   }
 

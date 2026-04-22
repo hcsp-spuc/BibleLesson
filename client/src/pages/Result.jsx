@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { markLessonDone } from '../lib/progress'
 
 const categoryThemes = {
   1: { sideImage: '/images/elementary.png', heroBg: '/images/background-elem.png' },
@@ -29,11 +30,12 @@ export default function Result() {
     setChecked(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])
   }
 
-  function handleComplete() {
+  async function handleComplete() {
     if (isFirst) {
+      await markLessonDone(categoryId, lessonNumber)
       navigate(`/auth-gate?category=${categoryId}`)
     } else {
-      localStorage.setItem(`cat${categoryId}_lesson${lessonNumber}_done`, 'true')
+      await markLessonDone(categoryId, lessonNumber)
       navigate(`/dashboard?category=${categoryId}`)
     }
   }
