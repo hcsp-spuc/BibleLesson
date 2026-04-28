@@ -86,12 +86,6 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-6 pb-16">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-extrabold text-gray-800">All Lessons</h2>
-          <button
-            onClick={() => navigate('/')}
-            className="text-gray-400 hover:text-gray-600 text-base font-semibold transition"
-          >
-            ← Back to Home
-          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
