@@ -1,7 +1,190 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { FaArrowLeft, FaBookOpen, FaQuestionCircle, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
+import { FaArrowLeft, FaBookOpen, FaQuestionCircle, FaCheckCircle, FaTimesCircle, FaStar, FaRocket, FaHeart } from 'react-icons/fa'
+import { GiOpenBook, GiAngelWings, GiStarMedal, GiDove } from 'react-icons/gi'
 import { supabase } from '../lib/supabase'
+
+const kidChoiceColors = [
+  { base: 'border-yellow-300 bg-yellow-50 text-yellow-800 hover:bg-yellow-100', active: 'border-yellow-500 bg-yellow-200 text-yellow-900' },
+  { base: 'border-pink-300 bg-pink-50 text-pink-800 hover:bg-pink-100',         active: 'border-pink-500 bg-pink-200 text-pink-900'         },
+  { base: 'border-sky-300 bg-sky-50 text-sky-800 hover:bg-sky-100',             active: 'border-sky-500 bg-sky-200 text-sky-900'             },
+  { base: 'border-purple-300 bg-purple-50 text-purple-800 hover:bg-purple-100', active: 'border-purple-500 bg-purple-200 text-purple-900'    },
+]
+
+function KidQuiz({ lesson, questions, step, maxStep, phase, answers, selected, revealed, setStep, setPhase, setSelected, setRevealed, handleNext, reviewMode }) {
+  const q = questions[step]
+  const total = questions.length
+  const isLast = step === total - 1
+  const progressPct = Math.round(((step + (phase === 'question' ? 0.5 : 0)) / total) * 100)
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(160deg, #e0f2fe 0%, #fef9c3 60%, #fce7f3 100%)' }}>
+
+      {/* Top bar */}
+      <div className="relative overflow-hidden shrink-0" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 40%, #ec4899 100%)' }}>
+        <div className="absolute inset-0 opacity-10 select-none pointer-events-none flex flex-wrap gap-6 p-2 text-white text-4xl">
+          {[FaStar, GiDove, FaHeart, FaStar, GiAngelWings, FaStar, FaHeart, GiDove].map((Icon, i) => <Icon key={i} />)}
+        </div>
+        <div className="relative z-10 px-6 py-4 flex items-center gap-4">
+          <button
+            onClick={() => reviewMode && lesson ? navigate(`/dashboard?category=${lesson.category_id}`) : navigate('/')}
+            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition"
+          >
+            <FaArrowLeft />
+          </button>
+          <div className="flex items-center gap-2">
+            <GiOpenBook className="text-white text-2xl" />
+            <span className="text-white text-xl font-black">Bible Adventure!</span>
+          </div>
+          <div className="ml-auto bg-white/20 rounded-full px-4 py-1 text-white font-black text-sm">
+            {step + 1} / {total}
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div className="px-6 pb-3">
+          <div className="bg-white/20 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #facc15, #f97316, #ec4899)' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Lesson title badge */}
+      <div className="flex justify-center mt-6 px-6">
+        <div className="bg-white rounded-2xl shadow-md px-6 py-3 flex items-center gap-3 border-2 border-purple-200">
+          <GiStarMedal className="text-yellow-400 text-2xl" />
+          <span className="text-purple-700 font-black text-lg">{lesson.title} — Guide {step + 1}</span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 px-4 md:px-16 py-6 max-w-3xl mx-auto w-full">
+
+        {phase === 'discussion' ? (
+          <div className="flex flex-col gap-6">
+            {/* Discussion card */}
+            <div className="bg-white rounded-3xl shadow-xl border-4 border-blue-200 p-8">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="bg-blue-100 rounded-full p-3">
+                  <GiOpenBook className="text-blue-500 text-2xl" />
+                </div>
+                <span className="text-blue-600 font-black text-lg uppercase tracking-widest">Let's Discover!</span>
+              </div>
+              <p className="text-gray-700 text-xl leading-relaxed">{q.discussion}</p>
+            </div>
+
+            {/* Next button */}
+            <button
+              onClick={() => setPhase('question')}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xl font-black py-5 rounded-3xl shadow-lg transition flex items-center justify-center gap-3"
+            >
+              <FaRocket />
+              {answers[q.id] ? 'Review Your Answer!' : "I'm Ready — Let's Answer!"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-5">
+            {/* Question card */}
+            <div className="bg-white rounded-3xl shadow-xl border-4 border-yellow-300 p-7">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-yellow-100 rounded-full p-3">
+                  <FaQuestionCircle className="text-yellow-500 text-2xl" />
+                </div>
+                <span className="text-yellow-600 font-black text-lg uppercase tracking-widest">Question Time!</span>
+              </div>
+              <p className="text-gray-800 text-2xl font-bold leading-snug">{q.text}</p>
+            </div>
+
+            {/* Choices */}
+            <div className="grid gap-4">
+              {q.choices.map((choice, ci) => {
+                const colors = kidChoiceColors[ci % kidChoiceColors.length]
+                const isSelected = selected === choice.id
+                const isCorrect = choice.is_correct
+                let cls = `${colors.base} border-2`
+                if (revealed) {
+                  if (isCorrect) cls = 'border-green-400 bg-green-100 text-green-800 border-2'
+                  else if (isSelected && !isCorrect) cls = 'border-red-400 bg-red-100 text-red-700 border-2'
+                  else cls = 'border-gray-200 bg-gray-50 text-gray-400 border-2'
+                } else if (isSelected) {
+                  cls = `${colors.active} border-2`
+                }
+                return (
+                  <button
+                    key={choice.id}
+                    onClick={() => !revealed && !reviewMode && setSelected(choice.id)}
+                    disabled={revealed || reviewMode}
+                    className={`text-left px-6 py-5 rounded-2xl text-lg font-bold transition flex items-center justify-between ${cls}`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-full bg-white/60 flex items-center justify-center font-black text-sm shrink-0">
+                        {String.fromCharCode(65 + ci)}
+                      </span>
+                      {choice.text}
+                    </span>
+                    {revealed && isCorrect && <FaCheckCircle className="text-green-500 text-xl shrink-0" />}
+                    {revealed && isSelected && !isCorrect && <FaTimesCircle className="text-red-400 text-xl shrink-0" />}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Feedback */}
+            {revealed && (() => {
+              const correct = q.choices.find(c => c.id === selected)?.is_correct
+              return (
+                <div className={`rounded-3xl p-6 border-4 flex flex-col gap-2 ${correct ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
+                  <div className={`flex items-center gap-3 text-xl font-black ${correct ? 'text-green-700' : 'text-red-600'}`}>
+                    {correct
+                      ? <><FaStar className="text-yellow-400 text-2xl" /> Awesome! That's correct! 🎉</>
+                      : <><FaTimesCircle className="text-red-400 text-2xl" /> Not quite! Keep trying! 💪</>
+                    }
+                  </div>
+                  {!correct && (
+                    <p className="text-red-500 font-semibold text-base pl-9">
+                      The correct answer is: <span className="font-black underline">{q.choices.find(c => c.is_correct)?.text}</span>
+                    </p>
+                  )}
+                  {!correct && q.choices.find(c => c.is_correct)?.explanation && (
+                    <p className="text-red-400 text-sm pl-9">{q.choices.find(c => c.is_correct).explanation}</p>
+                  )}
+                </div>
+              )
+            })()}
+
+            {/* Action buttons */}
+            <div className="flex flex-col gap-3 pb-8">
+              {!revealed && !reviewMode ? (
+                <button
+                  onClick={() => setRevealed(true)}
+                  disabled={!selected}
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white text-xl font-black py-5 rounded-3xl shadow-lg transition disabled:opacity-40 flex items-center justify-center gap-3"
+                >
+                  <FaCheckCircle /> Check My Answer!
+                </button>
+              ) : (
+                <button
+                  onClick={handleNext}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xl font-black py-5 rounded-3xl shadow-lg transition flex items-center justify-center gap-3"
+                >
+                  <FaRocket /> {isLast ? (reviewMode ? 'Back to Lessons! 🏠' : 'See My Results! 🌟') : 'Next Question!'}
+                </button>
+              )}
+              <button
+                onClick={() => setPhase('discussion')}
+                className="w-full bg-white border-2 border-purple-200 text-purple-500 font-bold py-3 rounded-2xl hover:bg-purple-50 transition text-base"
+              >
+                ← Back to Discussion
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function Quiz() {
   const { lessonId } = useParams()
@@ -83,6 +266,7 @@ export default function Quiz() {
       </div>
     </div>
   )
+
   if (!questions.length) return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <p className="text-gray-400 mb-4">No questions available for this lesson.</p>
@@ -102,6 +286,19 @@ export default function Quiz() {
   const theme = themes[lesson?.category_id] ?? themes[1]
 
   function handleNext() {
+    if (reviewMode) {
+      if (isLast) {
+        navigate(`/dashboard?category=${lesson.category_id}`)
+      } else {
+        const nextStep = step + 1
+        setStep(nextStep)
+        setPhase('discussion')
+        setSelected(answers[questions[nextStep].id] ?? null)
+        setRevealed(!!answers[questions[nextStep].id])
+      }
+      return
+    }
+
     const newAnswers = { ...answers, [q.id]: selected }
     setAnswers(newAnswers)
     setSelected(null)
@@ -124,6 +321,26 @@ export default function Quiz() {
       setPhase('discussion')
     }
   }
+
+  // Render kid-friendly layout for elementary
+  if (lesson?.category_id === 1) return (
+    <KidQuiz
+      lesson={lesson}
+      questions={questions}
+      step={step}
+      maxStep={maxStep}
+      phase={phase}
+      answers={answers}
+      selected={selected}
+      revealed={revealed}
+      setStep={setStep}
+      setPhase={setPhase}
+      setSelected={setSelected}
+      setRevealed={setRevealed}
+      handleNext={handleNext}
+      reviewMode={reviewMode}
+    />
+  )
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
@@ -225,8 +442,8 @@ export default function Quiz() {
                     return (
                       <button
                         key={choice.id}
-                        onClick={() => !revealed && setSelected(choice.id)}
-                        disabled={revealed}
+                        onClick={() => !revealed && !reviewMode && setSelected(choice.id)}
+                        disabled={revealed || reviewMode}
                         className={`text-left px-7 py-6 rounded-2xl border-2 text-2xl font-semibold transition ${choiceStyle}`}
                       >
                         <span className="flex items-center justify-between">
@@ -248,7 +465,7 @@ export default function Quiz() {
                       correct ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-600'
                     }`}>
                       {correct
-                        ? <><FaCheckCircle className="shrink-0 text-2xl" /> That's correct! Well done.</>  
+                        ? <><FaCheckCircle className="shrink-0 text-2xl" /> That's correct! Well done.</>
                         : (
                           <div className="flex flex-col gap-2">
                             <span className="flex items-center gap-3">
@@ -271,7 +488,7 @@ export default function Quiz() {
                   <p className="text-green-300 text-base font-bold tracking-widest uppercase mb-5">
                     {revealed ? 'Ready to continue?' : 'Select an answer above to continue.'}
                   </p>
-                  {!revealed ? (
+                  {!revealed && !reviewMode ? (
                     <button
                       onClick={() => setRevealed(true)}
                       disabled={!selected}
@@ -284,7 +501,7 @@ export default function Quiz() {
                       onClick={handleNext}
                       className="bg-white text-gray-800 text-2xl font-bold px-20 py-5 rounded-xl hover:bg-gray-100 transition"
                     >
-                      {isLast ? 'Submit Answers' : 'Continue'}
+                      {isLast ? (reviewMode ? 'Back to Dashboard' : 'Submit Answers') : 'Continue'}
                     </button>
                   )}
                 </div>
