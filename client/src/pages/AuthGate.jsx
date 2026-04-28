@@ -10,8 +10,7 @@ export default function AuthGate() {
   const category = searchParams.get('category') ?? '1'
 
   const [mode, setMode] = useState('signup')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -27,7 +26,7 @@ export default function AuthGate() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: `${firstName} ${lastName}`.trim() } },
+      options: { data: { full_name: name.trim() } },
     })
     setLoading(false)
     if (error) return setError(error.message)
@@ -91,21 +90,12 @@ export default function AuthGate() {
 
               <form onSubmit={handleSignUp} className="grid gap-6">
                 <div>
-                  <label className="block text-gray-700 text-base font-medium mb-2">* First name</label>
+                  <label className="block text-gray-700 text-base font-medium mb-2">* Name</label>
                   <input
                     type="text"
-                    value={firstName}
-                    onChange={e => setFirstName(e.target.value)}
-                    required
-                    className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-base font-medium mb-2">* Last name</label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={e => setLastName(e.target.value)}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder='E.g. Trina Ladoroz'
                     required
                     className="w-full border border-gray-300 bg-white rounded px-4 py-3 text-lg focus:outline-none focus:border-blue-400"
                   />
