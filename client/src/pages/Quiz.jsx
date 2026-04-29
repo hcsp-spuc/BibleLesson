@@ -11,7 +11,7 @@ const kidChoiceColors = [
   { base: 'border-purple-300 bg-purple-50 text-purple-800 hover:bg-purple-100', active: 'border-purple-500 bg-purple-200 text-purple-900'    },
 ]
 
-function KidQuiz({ lesson, questions, step, maxStep, phase, answers, selected, revealed, setStep, setPhase, setSelected, setRevealed, handleNext, reviewMode }) {
+function KidQuiz({ lesson, questions, step, maxStep, phase, answers, selected, revealed, setStep, setPhase, setSelected, setRevealed, handleNext, reviewMode, navigate }) {
   const q = questions[step]
   const total = questions.length
   const isLast = step === total - 1
@@ -22,17 +22,26 @@ function KidQuiz({ lesson, questions, step, maxStep, phase, answers, selected, r
 
       {/* Top bar */}
       <div className="relative overflow-hidden shrink-0" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 40%, #ec4899 100%)' }}>
-        <div className="absolute inset-0 opacity-10 select-none pointer-events-none flex flex-wrap gap-6 p-2 text-white text-4xl">
-          {[FaStar, GiDove, FaHeart, FaStar, GiAngelWings, FaStar, FaHeart, GiDove].map((Icon, i) => <Icon key={i} />)}
+        <div className="absolute inset-0 opacity-10 select-none pointer-events-none text-white">
+          {[
+            { Icon: FaStar,       style: { top: '10%',  left: '5%',   fontSize: '2rem'  } },
+            { Icon: GiDove,       style: { top: '20%',  left: '22%',  fontSize: '2.5rem'} },
+            { Icon: FaHeart,      style: { top: '5%',   left: '45%',  fontSize: '1.8rem'} },
+            { Icon: FaStar,       style: { top: '60%',  left: '55%',  fontSize: '2.2rem'} },
+            { Icon: GiAngelWings, style: { top: '15%',  left: '70%',  fontSize: '3rem'  } },
+            { Icon: FaStar,       style: { top: '70%',  left: '80%',  fontSize: '1.5rem'} },
+            { Icon: FaHeart,      style: { top: '50%',  left: '12%',  fontSize: '2rem'  } },
+            { Icon: GiDove,       style: { top: '30%',  left: '90%',  fontSize: '2.5rem'} },
+          ].map(({ Icon, style }, i) => <Icon key={i} className="absolute" style={style} />)}
         </div>
-        <div className="relative z-10 px-6 py-4 flex items-center gap-4">
+        <div className="relative z-10 px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => reviewMode && lesson ? navigate(`/dashboard?category=${lesson.category_id}`) : navigate('/')}
             className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition"
           >
             <FaArrowLeft />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-4">
             <GiOpenBook className="text-white text-2xl" />
             <span className="text-white text-xl font-black">Bible Adventure!</span>
           </div>
@@ -65,14 +74,14 @@ function KidQuiz({ lesson, questions, step, maxStep, phase, answers, selected, r
         {phase === 'discussion' ? (
           <div className="flex flex-col gap-6">
             {/* Discussion card */}
-            <div className="bg-white rounded-3xl shadow-xl border-4 border-blue-200 p-8">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="bg-blue-100 rounded-full p-3">
-                  <GiOpenBook className="text-blue-500 text-2xl" />
+            <div className="bg-white rounded-3xl shadow-xl border-4 border-blue-200 p-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-blue-100 rounded-full p-4">
+                  <GiOpenBook className="text-blue-500 text-4xl" />
                 </div>
-                <span className="text-blue-600 font-black text-lg uppercase tracking-widest">Let's Discover!</span>
+                <span className="text-blue-600 font-black text-2xl uppercase tracking-widest">Let's Discover!</span>
               </div>
-              <p className="text-gray-700 text-xl leading-relaxed">{q.discussion}</p>
+              <p className="text-gray-700 text-2xl leading-relaxed">{q.discussion}</p>
             </div>
 
             {/* Next button */}
@@ -339,6 +348,7 @@ export default function Quiz() {
       setRevealed={setRevealed}
       handleNext={handleNext}
       reviewMode={reviewMode}
+      navigate={navigate}
     />
   )
 
